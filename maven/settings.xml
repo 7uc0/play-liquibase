@@ -1,0 +1,10 @@
+<settings>
+	<proxies>
+		<!-- proxy>
+			<protocol>http</protocol>
+			<host>proxy.leyio.com</host>
+			<port>3128</port>
+			<nonProxyHosts>localhost</nonProxyHosts>
+		</proxy -->
+	</proxies>
+</settings>
