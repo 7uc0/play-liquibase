@@ -46,12 +46,12 @@ public class LiquibasePlugin extends PlayPlugin {
 				Logger.info("Changelog Execution performed");
 				JPAPlugin.closeTx(false);
 			
-			} catch (LiquibaseException e) {
+			} catch (LiquibaseException e) { 
 				JPAPlugin.closeTx(true);
-				throw new LiquibaseException(e.getMessage());
+				throw new LiquibaseUpdateException(e.getMessage());
 			} catch (IOException ioe) {
 				JPAPlugin.closeTx(true);
-				throw new LiquibaseException(ioe.getMessage());				
+				throw new LiquibaseUpdateException(ioe.getMessage());				
 			}
 		} else {
 			Logger.info("Auto update flag set to false or not available => skipping structural update");

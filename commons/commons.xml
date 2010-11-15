@@ -1,0 +1,246 @@
+<project name="playproject" xmlns:artifact="urn:maven-artifact-ant">
+	
+	<property environment="env"/>
+	<property file="build.properties"/>
+	
+	<macrodef name="tokens">
+		<sequential>
+			
+			<tstamp>
+				 <format property="NOW" pattern="yyyy-MM-dd hh:mm aa" locale="fr,FR"/>
+			</tstamp>
+			
+			<condition property="build.number" value="${env.BUILD_TAG}" else="${NOW}">
+				<isset property="env.BUILD_TAG"/>
+			</condition>
+		
+			<condition property="revision.number" value="${env.SVN_REVISION}" else="unknown">
+				<isset property="env.SVN_REVISION"/>
+			</condition>
+			
+			<echo>
+				Build Number : ${build.number}
+				Svn Revision : ${revision.number}
+			</echo>
+		</sequential>
+	</macrodef>
+	
+	<tokens />
+
+	<path id="project.classpath">
+		<pathelement path="${env.PLAY_HOME}/framework/classes"/>
+		<fileset dir="${env.PLAY_HOME}/framework/lib">
+			<include name="*.jar"/>
+		</fileset>
+		<fileset dir="${env.PLAY_HOME}/framework">
+            <include name="*.jar"/>
+        </fileset>		
+		<fileset dir="lib/compile">
+			<include name="*.jar"/>
+		</fileset>
+	</path>
+
+	<target name="clean">
+		<delete failonerror="false">
+			<fileset dir="lib" includes="*.jar"/>
+			<fileset dir="dist" includes="*.zip"/>
+		</delete>
+	</target>
+
+
+	<target name="compile" depends="thirdparty">
+		<mkdir dir="tmp/classes" />
+		<javac destdir="tmp/classes" target="1.6" debug="true" includeantruntime="false">
+			<src path="src"/>
+			<classpath refid="project.classpath" />
+		</javac>
+	</target>
+
+	<target name="build" depends="compile">
+
+		<copy todir="tmp/classes">
+			<fileset dir="src">
+				<include name="**/*.properties"/>
+				<include name="**/*.xml"/>
+				<include name="**/play.plugins"/>
+				<include name="**/play.static"/>
+			</fileset>
+		</copy>
+
+		<jar destfile="lib/play-${module}.jar" basedir="tmp/classes">
+			<manifest>
+				<section name="Play-module">
+					<attribute name="Specification-Title" value="${module}"/>
+					<attribute name="Build-Tag" value="${build.number}"/>
+					<attribute name="Subversion-Revision" value="${revision.number}"/>
+				</section>
+			</manifest>
+		</jar>
+
+		<delete dir="tmp" />
+	</target>
+
+	<target name="dev" >
+		<property name="dev" value="true" />
+	</target>
+
+	<target name="maven-def">
+		<mkdir dir="lib"/>
+		<path id="maven-ant-tasks.classpath" path="${maven}/maven-ant-tasks.jar" />
+		<typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant" classpathref="maven-ant-tasks.classpath" />
+		<artifact:pom id="maven.project" file="${maven}/pom.xml" />
+		<artifact:remoteRepository id="leyio.releases.repo" url="http://nexus.leyio.com/nexus/content/groups/leyio.release.repo" />
+		<artifact:remoteRepository id="leyio.snapshots.repo" url="http://nexus.leyio.com/nexus/content/groups/leyio.snapshots.repo">
+			<snapshots updatePolicy="always" />
+		</artifact:remoteRepository>
+		<artifact:localRepository id="local.repository" path="${user.home}/.hudson/m2/repository" />
+	</target>
+
+	<target name="thirdparty" unless="dev" depends="maven-def">
+		
+		<mkdir dir="lib/test"/>
+		<mkdir dir="lib/compile"/>
+		<mkdir dir="lib/runtime"/>
+			
+		<artifact:dependencies filesetId="compile.fileset" useScope="compile" settingsFile="${maven}/settings.xml" versionsId="compile.versions">
+			<pom refid="maven.project" />
+			<remoteRepository refid="leyio.releases.repo" />
+			<remoteRepository refid="leyio.snapshots.repo" />
+			<localRepository refid="local.repository" />
+		</artifact:dependencies>
+		<copy todir="lib/compile">
+			<fileset refid="compile.fileset" />
+			<mapper classpathref="maven-ant-tasks.classpath" classname="org.apache.maven.artifact.ant.VersionMapper" from="${compile.versions}" to="flatten" />
+		</copy>
+
+		<artifact:dependencies filesetId="test.fileset" useScope="test" settingsFile="${maven}/settings.xml" versionsId="test.versions">
+			<pom refid="maven.project" />
+			<remoteRepository refid="leyio.releases.repo" />
+			<remoteRepository refid="leyio.snapshots.repo" />
+			<localRepository refid="local.repository" />
+		</artifact:dependencies>
+		<copy todir="lib/test" overwrite="true">
+			<fileset refid="test.fileset" />
+			<mapper classpathref="maven-ant-tasks.classpath" classname="org.apache.maven.artifact.ant.VersionMapper" from="${test.versions}" to="flatten" />
+		</copy>
+		
+		<copy todir="lib" overwrite="true">
+			<fileset dir="lib/runtime" includes="*.jar"/>
+		</copy>
+		
+		<antcall target="custom:copy"></antcall>
+	</target>
+	
+	
+	<target name="custom:copy">
+		<echo>Custom Copy target, override for custom libraries copy after thirdparty</echo>
+		<echo>Use for plugin 3rd party dependency management</echo>
+	</target>
+
+	<target name="distrib-libs" depends="maven-def" if="env.IAM_HUDSON">
+		<echo>Maven repository publication  : ${repository.name} </echo>
+		<artifact:install-provider artifactId="wagon-http" version="1.0-beta-2" />
+
+		<artifact:deploy file="release/${module}.zip">
+			<remoteRepository url="http://nexus.leyio.com/nexus/content/repositories/${repository.name}">
+				<authentication username="hudson" password="hudson" />
+			</remoteRepository>
+			<pom refid="maven.project" />
+		</artifact:deploy>
+
+	</target>
+
+	<target name="hudson-set-latest">
+		<replaceregexp file="${maven}/pom.xml" match="&lt;version&gt;(.*)&lt;/version&gt;" replace="&lt;version&gt;\1-SNAPSHOT&lt;/version&gt;" />
+	</target>
+
+	<target name="hudson-snapshot" description="set repository to snapshot">
+		<property name="repository.name" value="snapshots"/>
+		<echo>Distribution repository name : ${repository.name}</echo>
+	</target>
+
+	<target name="hudson-release" description="set repository to release">
+		<property name="repository.name" value="releases"/>
+		<echo>Distribution repository name : ${repository.name}</echo>
+	</target>
+	
+	
+	<target name="hudson" description="hudson automated tasks" depends="hudson-snapshot,hudson-set-latest,clean,build,run-tests,zipmodule,distrib-libs"/>
+	
+	<target name="release" description="hudson release target" depends="hudson-release,clean,build,zipmodule,distrib-libs"/>
+
+	<macrodef name="playtest">
+		<attribute name="testapp"/>
+		<attribute name="testpath"/>
+		
+		<sequential>
+			
+			<exec executable="play" os="Mac OS X" failifexecutionfails="true" failonerror="true" outputproperty="result" dir="@{testpath}">
+				<arg value="auto-test"/>
+			</exec>
+			
+			<exec executable="cmd" os="Windows 2003" failifexecutionfails="true" failonerror="true" resolveexecutable="true">
+				<arg value="/c"/>
+				<arg value="play.bat"/>
+				<arg value="auto-test"/>
+			</exec>
+			
+			<condition property="testresult" value="unstable" else="success">
+				<available file="@{testpath}/test-result/result.failed"/>
+			</condition>
+			
+			<condition property="successprobe" value="success" else="unstable">
+				<available file="@{testpath}/test-result/result.passed"/>
+			</condition>
+			
+			<echo>résultat : ${result} for @{testapp} - testresult : ${testresult} / ${successprobe} </echo>
+			
+			<condition property="success" value="true" else="false">
+				<and>
+					<equals arg1="success" arg2="${testresult}"/>
+				</and>
+			</condition>
+			
+			<condition property="failure">
+				<or>
+					<equals arg1="-1" arg2="result" />
+					<equals arg1="unstable" arg2="${testresult}" />
+					<equals arg1="false" arg2="${success}" />
+				</or>
+			</condition>
+			
+			<echo> Success ? ${success}</echo>
+			<fail if="failure" message="Play tests for app @{testapp} contains at least one error, please check test result files in @{testpath}/test-result" />
+			
+		</sequential>
+		
+	</macrodef>
+	
+	<target name="run-tests">
+		<playtest testapp="In Memory Db Test App"  testpath="tests/testdb"/>
+		
+		<!-- insert call to other play app for testing purpose -->
+	</target>	
+
+	<target name="zipmodule">
+		<property name="archivepath" location="${java.io.tmpdir}/${module}.zip"/>
+		<delete file="${archivepath}"/>
+
+		<delete dir="release"/>
+		<mkdir dir="release"/>
+		
+		<zip destfile="${archivepath}">
+			<fileset dir="${basedir}" >
+				<include name="app/**/*" />
+				<include name="src/**/*"/>
+				<include name="public/**/*"/>
+				<include name="conf/**/*"/>
+				<include name="documentation/**/*"/>
+				<include name="build/sql/update.sql"/>
+				<include name="lib/*.jar"/>
+			</fileset>
+		</zip>
+		<copy file="${archivepath}" todir="release" overwrite="true"/>
+	</target>
+	
+</project>

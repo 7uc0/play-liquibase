@@ -2,7 +2,7 @@ package play.modules.liquibase;
 
 import play.exceptions.PlayException;
 
-public class LiquibaseException extends PlayException {
+public class LiquibaseUpdateException extends PlayException {
 
 	public String getErrorTitle() {
 		return "Liquibase Error";
@@ -13,11 +13,11 @@ public class LiquibaseException extends PlayException {
         return String.format("A DBUpdate error occured (%s): <strong>%s</strong>", getMessage(), getCause() == null ? "" : getCause().getMessage());
 	}
 	
-    public LiquibaseException(String message) {
+    public LiquibaseUpdateException(String message) {
         super(message, null);
     }
 
-    public LiquibaseException(String message, Throwable cause) {
+    public LiquibaseUpdateException(String message, Throwable cause) {
         super(message, cause);
     }
 
