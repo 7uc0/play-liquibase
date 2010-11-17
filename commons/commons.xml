@@ -56,7 +56,7 @@
 		</javac>
 	</target>
 
-	<target name="build" depends="compile">
+	<target name="build" depends="compile, zipmodule">
 
 		<copy todir="tmp/classes">
 			<fileset dir="src">
