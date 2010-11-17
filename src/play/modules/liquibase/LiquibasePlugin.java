@@ -3,6 +3,7 @@ package play.modules.liquibase;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
+import java.sql.SQLException;
 
 import liquibase.ClassLoaderFileOpener;
 import liquibase.Liquibase;
@@ -27,7 +28,7 @@ public class LiquibasePlugin extends PlayPlugin {
 			Logger.info("Auto update flag found and positive => let's get on with changelog update");
 			try {
 				
-				Connection cnx = DB.getConnection();
+				Connection cnx = DB.datasource.getConnection();
 				Liquibase liquibase = new Liquibase(mainchangelogpath, new ClassLoaderFileOpener(), cnx);
 				InputStream stream = Play.classloader.getResourceAsStream(propertiespath);
 				
@@ -49,6 +50,8 @@ public class LiquibasePlugin extends PlayPlugin {
 				Logger.info("Validation Ok");
 				liquibase.changeLogSync(contexts);
 				Logger.info("Changelog Execution performed");
+			} catch (SQLException sqle) {
+				throw new LiquibaseUpdateException(sqle.getMessage());
 			} catch (LiquibaseException e) { 
 				throw new LiquibaseUpdateException(e.getMessage());
 			} catch (IOException ioe) {
