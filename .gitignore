@@ -1,10 +1,5 @@
 .project
 .classpath
-lib/*
-bin/.gitignore
-bin/README
-bin/build.xml
-bin/commands.py
-bin/play.plugins
-bin/play/modules/liquibase/LiquibasePlugin.class
-bin/play/modules/liquibase/LiquibaseUpdateException.class
+lib
+bin
+release
