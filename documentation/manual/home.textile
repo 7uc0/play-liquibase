@@ -1,6 +1,6 @@
 h1. Liquibase Module
 
-bq. "You never develop code without version control, why do you develop your database without it ?"
+bq. You never develop code without version control, why do you develop your database without it ?™
 
 p. Liquibase (http://www.liquibase.org) is a simple, reliable and elegant solution for database refactoring management. It comes with main features :
 
@@ -13,7 +13,7 @@ p. Liquibase (http://www.liquibase.org) is a simple, reliable and elegant soluti
 
 Liquibase module differs from Migrate module for the main following reason :
 
-h3. Database changes follow application changes just the same way as code source does
+h3. Database changes follow application changes just the same way code source does
 
 h2. Getting started
 
