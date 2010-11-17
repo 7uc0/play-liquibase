@@ -1,6 +1,7 @@
 package play.modules.liquibase;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 
 import liquibase.ClassLoaderFileOpener;
@@ -10,7 +11,6 @@ import play.Logger;
 import play.Play;
 import play.PlayPlugin;
 import play.db.DB;
-import play.db.jpa.JPAPlugin;
 import play.utils.Properties;
 
 public class LiquibasePlugin extends PlayPlugin {
@@ -29,13 +29,19 @@ public class LiquibasePlugin extends PlayPlugin {
 				
 				Connection cnx = DB.getConnection();
 				Liquibase liquibase = new Liquibase(mainchangelogpath, new ClassLoaderFileOpener(), cnx);
-				Properties props = new Properties();
-				props.load(Play.classloader.getResourceAsStream(propertiespath ));
+				InputStream stream = Play.classloader.getResourceAsStream(propertiespath);
 				
-				for (String key:props.keySet()) {
-					String val = props.get(key);
-					Logger.info("found parameter [%1$s] / [%2$s] for liquibase update", key, val);
-					liquibase.setChangeLogParameterValue(key, val);
+				if (null != stream) {
+					Properties props = new Properties();
+					props.load(stream);
+					
+					for (String key:props.keySet()) {
+						String val = props.get(key);
+						Logger.info("found parameter [%1$s] / [%2$s] for liquibase update", key, val);
+						liquibase.setChangeLogParameterValue(key, val);
+					}
+				} else {
+					Logger.warn("Could not find properties file [%s]", propertiespath);
 				}
 				
 				Logger.info("Ready for database diff generation");
@@ -43,7 +49,6 @@ public class LiquibasePlugin extends PlayPlugin {
 				Logger.info("Validation Ok");
 				liquibase.changeLogSync(contexts);
 				Logger.info("Changelog Execution performed");
-			
 			} catch (LiquibaseException e) { 
 				throw new LiquibaseUpdateException(e.getMessage());
 			} catch (IOException ioe) {
