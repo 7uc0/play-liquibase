@@ -56,7 +56,7 @@
 		</javac>
 	</target>
 
-	<target name="build" depends="jar, zipmodule"/>
+	<target name="build" depends="clean, jar, zipmodule"/>
 		
 	<target name="jar" depends="compile">
 
