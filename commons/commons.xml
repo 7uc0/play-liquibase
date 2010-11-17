@@ -206,7 +206,6 @@
 				<include name="public/**/*"/>
 				<include name="conf/**/*"/>
 				<include name="documentation/**/*"/>
-				<include name="build/sql/update.sql"/>
 				<include name="lib/*.jar"/>
 			</fileset>
 		</zip>
