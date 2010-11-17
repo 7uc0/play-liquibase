@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.gdteam.db</groupId>
 	<artifactId>play-liquibase</artifactId>
-	<version>1.0.0</version>
+	<version>1.0</version>
 	<packaging>zip</packaging>
 
 	<dependencies>

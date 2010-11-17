@@ -27,16 +27,15 @@ public class LiquibasePlugin extends PlayPlugin {
 			Logger.info("Auto update flag found and positive => let's get on with changelog update");
 			try {
 				
-				JPAPlugin.startTx(false);
-				
 				Connection cnx = DB.getConnection();
 				Liquibase liquibase = new Liquibase(mainchangelogpath, new ClassLoaderFileOpener(), cnx);
 				Properties props = new Properties();
 				props.load(Play.classloader.getResourceAsStream(propertiespath ));
 				
 				for (String key:props.keySet()) {
-					Logger.info("found key parameter [%s] for liquibase update", key);
-					liquibase.setChangeLogParameterValue(key, props.get(key));
+					String val = props.get(key);
+					Logger.info("found parameter [%1$s] / [%2$s] for liquibase update", key, val);
+					liquibase.setChangeLogParameterValue(key, val);
 				}
 				
 				Logger.info("Ready for database diff generation");
@@ -44,13 +43,10 @@ public class LiquibasePlugin extends PlayPlugin {
 				Logger.info("Validation Ok");
 				liquibase.changeLogSync(contexts);
 				Logger.info("Changelog Execution performed");
-				JPAPlugin.closeTx(false);
 			
 			} catch (LiquibaseException e) { 
-				JPAPlugin.closeTx(true);
 				throw new LiquibaseUpdateException(e.getMessage());
 			} catch (IOException ioe) {
-				JPAPlugin.closeTx(true);
 				throw new LiquibaseUpdateException(ioe.getMessage());				
 			}
 		} else {
