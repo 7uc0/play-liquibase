@@ -137,38 +137,6 @@
 		<echo>Use for plugin 3rd party dependency management</echo>
 	</target>
 
-	<target name="distrib-libs" depends="maven-def" if="env.IAM_HUDSON">
-		<echo>Maven repository publication  : ${repository.name} </echo>
-		<artifact:install-provider artifactId="wagon-http" version="1.0-beta-2" />
-
-		<artifact:deploy file="release/${module}.zip">
-			<remoteRepository url="http://nexus.leyio.com/nexus/content/repositories/${repository.name}">
-				<authentication username="hudson" password="hudson" />
-			</remoteRepository>
-			<pom refid="maven.project" />
-		</artifact:deploy>
-
-	</target>
-
-	<target name="hudson-set-latest">
-		<replaceregexp file="${maven}/pom.xml" match="&lt;version&gt;(.*)&lt;/version&gt;" replace="&lt;version&gt;\1-SNAPSHOT&lt;/version&gt;" />
-	</target>
-
-	<target name="hudson-snapshot" description="set repository to snapshot">
-		<property name="repository.name" value="snapshots"/>
-		<echo>Distribution repository name : ${repository.name}</echo>
-	</target>
-
-	<target name="hudson-release" description="set repository to release">
-		<property name="repository.name" value="releases"/>
-		<echo>Distribution repository name : ${repository.name}</echo>
-	</target>
-	
-	
-	<target name="hudson" description="hudson automated tasks" depends="hudson-snapshot,hudson-set-latest,clean,build,run-tests,zipmodule,distrib-libs"/>
-	
-	<target name="release" description="hudson release target" depends="hudson-release,clean,build,zipmodule,distrib-libs"/>
-
 	<macrodef name="playtest">
 		<attribute name="testapp"/>
 		<attribute name="testpath"/>
