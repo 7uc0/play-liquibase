@@ -47,7 +47,7 @@ p.
 Changeset files / properties can be jared and integrated - thus versioned - as 3rd party libs, at module / application level, just the same way jdbc drivers are.
 
 p. 
-One may also handle changeset at the same level as domainmodel declaration - that's what we do at telecomDesign -, within dedicated module/application, using play module dependency mechanism to create modular app.
+One may also handle changeset at the same level as domainmodel declaration - that's what we do at GdTeam -, within dedicated module/application, using play module dependency mechanism to create modular app.
 Modules archives are still built and maintained against 3rd party repository such as nexus / archiva / artifactory, and then released agains private / public play module repository (see http://code.google.com/p/play-repo/ for more information)
 
 
