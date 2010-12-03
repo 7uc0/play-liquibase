@@ -1,5 +1,6 @@
 package play.modules.liquibase;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -23,12 +24,13 @@ public class LiquibasePlugin extends PlayPlugin {
 		String mainchangelogpath = Play.configuration.getProperty("liquibase.changelog", "mainchangelog.xml");
 		String propertiespath = Play.configuration.getProperty("liquibase.properties", "liquibase.properties");
 		String contexts = Play.configuration.getProperty("liquibase.contexts");
+		Boolean keepdump = Boolean.valueOf(Play.configuration.getProperty("liquibase.keepfile"));
 		
 		if (null != autoupdate && "true".equals(autoupdate)) {
 			Logger.info("Auto update flag found and positive => let's get on with changelog update");
 			try {
-				
 				Connection cnx = DB.datasource.getConnection();
+				cnx.setAutoCommit(false);
 				Liquibase liquibase = new Liquibase(mainchangelogpath, new ClassLoaderFileOpener(), cnx);
 				InputStream stream = Play.classloader.getResourceAsStream(propertiespath);
 				
@@ -46,8 +48,6 @@ public class LiquibasePlugin extends PlayPlugin {
 				}
 				
 				Logger.info("Ready for database diff generation");
-				liquibase.validate();
-				Logger.info("Validation Ok");
 				liquibase.changeLogSync(contexts);
 				Logger.info("Changelog Execution performed");
 			} catch (SQLException sqle) {
@@ -59,6 +59,5 @@ public class LiquibasePlugin extends PlayPlugin {
 			}
 		} else {
 			Logger.info("Auto update flag set to false or not available => skipping structural update");
-		}
-	}
+		}	}
 }

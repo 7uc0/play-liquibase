@@ -11,7 +11,7 @@
 	</target>
 
 	<target name="run-tests">
-		<playtest testapp="In Memory Db Test App"  testpath="tests/testdb"/>
+		<echo>any play run-test app can be calle in this place</echo>
 	</target>
 
 </project>
