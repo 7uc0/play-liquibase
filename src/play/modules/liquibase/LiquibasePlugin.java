@@ -1,6 +1,5 @@
 package play.modules.liquibase;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -24,7 +23,6 @@ public class LiquibasePlugin extends PlayPlugin {
 		String mainchangelogpath = Play.configuration.getProperty("liquibase.changelog", "mainchangelog.xml");
 		String propertiespath = Play.configuration.getProperty("liquibase.properties", "liquibase.properties");
 		String contexts = Play.configuration.getProperty("liquibase.contexts");
-		Boolean keepdump = Boolean.valueOf(Play.configuration.getProperty("liquibase.keepfile"));
 		
 		if (null != autoupdate && "true".equals(autoupdate)) {
 			Logger.info("Auto update flag found and positive => let's get on with changelog update");
