@@ -17,6 +17,9 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.lockservice.LockService;
 import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.CompositeResourceAccessor;
+import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.ResourceAccessor;
 
 import org.hibernate.JDBCException;
 
@@ -63,6 +66,7 @@ public class LiquibasePlugin extends PlayPlugin {
 				Database database = CommandLineUtils.createDatabaseObject(Play.classloader, url, username, password, driver, null, null);
 				*/
 				Connection cnx = DB.datasource.getConnection();
+				ResourceAccessor r = new CompositeResourceAccessor(new ClassLoaderResourceAccessor(Play.classloader), new FileSystemResourceAccessor(Play.applicationPath.getAbsolutePath()));
 				
 				Liquibase liquibase = new Liquibase(mainchangelogpath, new ClassLoaderResourceAccessor(), new JdbcConnection(cnx));
 				InputStream stream = Play.classloader.getResourceAsStream(propertiespath);
