@@ -66,9 +66,9 @@ public class LiquibasePlugin extends PlayPlugin {
 				Database database = CommandLineUtils.createDatabaseObject(Play.classloader, url, username, password, driver, null, null);
 				*/
 				Connection cnx = DB.datasource.getConnection();
-				ResourceAccessor r = new CompositeResourceAccessor(new ClassLoaderResourceAccessor(Play.classloader), new FileSystemResourceAccessor(Play.applicationPath.getAbsolutePath()));
+				ResourceAccessor composite = new CompositeResourceAccessor(new ClassLoaderResourceAccessor(Play.classloader), new FileSystemResourceAccessor(Play.applicationPath.getAbsolutePath()));
 				
-				Liquibase liquibase = new Liquibase(mainchangelogpath, new ClassLoaderResourceAccessor(), new JdbcConnection(cnx));
+				Liquibase liquibase = new Liquibase(mainchangelogpath, composite, new JdbcConnection(cnx));
 				InputStream stream = Play.classloader.getResourceAsStream(propertiespath);
 
 				if (null != stream) {
