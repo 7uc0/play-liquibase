@@ -11,6 +11,7 @@ import java.util.List;
 
 import liquibase.Liquibase;
 import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
@@ -55,6 +56,9 @@ public class LiquibasePlugin extends PlayPlugin {
 		
 		if (null != autoupdate && "true".equals(autoupdate)) {
 			Logger.info("Auto update flag found and positive => let's get on with changelog update");
+			InputStream pstream = null;
+			InputStream clstream = null;
+			
 			try {
 				
 				/**
@@ -67,13 +71,15 @@ public class LiquibasePlugin extends PlayPlugin {
 				*/
 				Connection cnx = DB.datasource.getConnection();
 				ResourceAccessor composite = new CompositeResourceAccessor(new ClassLoaderResourceAccessor(Play.classloader), new FileSystemResourceAccessor(Play.applicationPath.getAbsolutePath()));
+				Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(cnx));
 				
-				Liquibase liquibase = new Liquibase(mainchangelogpath, composite, new JdbcConnection(cnx));
-				InputStream stream = Play.classloader.getResourceAsStream(propertiespath);
+				final Liquibase liquibase = new Liquibase(mainchangelogpath, composite, database);
+				pstream = Play.classloader.getResourceAsStream(propertiespath);
+				clstream = Play.classloader.getResourceAsStream(mainchangelogpath);
 
-				if (null != stream) {
+				if (null != pstream) {
 					Properties props = new Properties();
-					props.load(stream);
+					props.load(pstream);
 					
 					for (String key:props.keySet()) {
 						String val = props.get(key);
@@ -136,6 +142,20 @@ public class LiquibasePlugin extends PlayPlugin {
 						Logger.warn(jdbce,"problem closing connection");
 					}
 				}
+				if (null != pstream) {
+					try {
+						pstream.close();
+					} catch (Exception e) {
+						
+					}
+				}
+				if (null != clstream) {
+					try {
+						clstream.close();
+					} catch (Exception e) {
+						
+					}					
+				}				
 			}
 
 		} else {
