@@ -19,7 +19,6 @@ import liquibase.exception.ValidationFailedException;
 import liquibase.lockservice.LockService;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 
 import org.hibernate.JDBCException;
@@ -38,7 +37,7 @@ public class LiquibasePlugin extends PlayPlugin {
 		String autoupdate = Play.configuration.getProperty("liquibase.active");
 		String mainchangelogpath = Play.configuration.getProperty("liquibase.changelog", "mainchangelog.xml");
 		String propertiespath = Play.configuration.getProperty("liquibase.properties", "liquibase.properties");
-		String contexts = Play.configuration.getProperty("liquibase.contexts");
+		String contexts = Play.configuration.getProperty("liquibase.contexts",null);
 		String actions = Play.configuration.getProperty("liquibase.actions");
 		
 		if (null == actions) {
