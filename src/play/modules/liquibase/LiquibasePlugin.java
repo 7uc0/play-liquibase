@@ -38,6 +38,7 @@ public class LiquibasePlugin extends PlayPlugin {
 		String mainchangelogpath = Play.configuration.getProperty("liquibase.changelog", "mainchangelog.xml");
 		String propertiespath = Play.configuration.getProperty("liquibase.properties", "liquibase.properties");
 		String contexts = Play.configuration.getProperty("liquibase.contexts",null);
+		contexts = (null != contexts && !contexts.trim().isEmpty()) ? contexts : null;
 		String actions = Play.configuration.getProperty("liquibase.actions");
 		
 		if (null == actions) {
@@ -60,14 +61,6 @@ public class LiquibasePlugin extends PlayPlugin {
 			
 			try {
 				
-				/**
-				String url = Play.configuration.getProperty("db.url");
-				String username = Play.configuration.getProperty("db.user");
-				String password = Play.configuration.getProperty("db.pass");
-				String driver = Play.configuration.getProperty("db.driver");
-				
-				Database database = CommandLineUtils.createDatabaseObject(Play.classloader, url, username, password, driver, null, null);
-				*/
 				Connection cnx = DB.datasource.getConnection();
 				//ResourceAccessor composite = new CompositeResourceAccessor(new ClassLoaderResourceAccessor(Play.classloader), new FileSystemResourceAccessor(Play.applicationPath.getAbsolutePath()));
 				ResourceAccessor composite = new CompositeResourceAccessor(new ClassLoaderResourceAccessor(Play.classloader));
