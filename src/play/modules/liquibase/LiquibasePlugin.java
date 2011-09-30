@@ -34,7 +34,7 @@ public class LiquibasePlugin extends PlayPlugin {
 	@Override
 	public void onApplicationStart() {
 		
-		String autoupdate = Play.configuration.getProperty("liquibase.active");
+		String autoupdate = Play.configuration.getProperty("liquibase.active","false");
 		String mainchangelogpath = Play.configuration.getProperty("liquibase.changelog", "mainchangelog.xml");
 		String propertiespath = Play.configuration.getProperty("liquibase.properties", "liquibase.properties");
 		String contexts = Play.configuration.getProperty("liquibase.contexts",null);
@@ -54,7 +54,8 @@ public class LiquibasePlugin extends PlayPlugin {
 		
 		Database db = null;
 		
-		if (null != autoupdate && "true".equals(autoupdate)) {
+		if (true == Boolean.valueOf(autoupdate)) {
+			
 			Logger.info("Auto update flag found and positive => let's get on with changelog update");
 			InputStream pstream = null;
 			InputStream clstream = null;
@@ -152,7 +153,7 @@ public class LiquibasePlugin extends PlayPlugin {
 			}
 
 		} else {
-			Logger.info("Auto update flag set to false or not available => skipping structural update");
+			Logger.info("Auto update flag [%s] != true  => skipping structural update", autoupdate);
 		}
 	}
 }
