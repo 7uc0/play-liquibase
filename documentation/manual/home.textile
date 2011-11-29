@@ -39,8 +39,7 @@ liquibase.actions=status|update|validate|sync|listlocks|releaselocks|clearchecks
 liquibase.changelog=changelog_path (classpath loaded)
 liquibase.properties=properties_path (classpath loaded)
 liquibase.contexts=ctxt1[,ctx2]
-
-More features (hosts execution filter, underlying database changelog structure visualization...) under development
+liquibase.scanner=jar|src
 
 h2. Example
 
@@ -53,6 +52,7 @@ pre. %staging.liquibase.active=true
 %staging.liquibase.actions=status,update
 %staging.liquibase.changelog=models/myapp/mainchangelog.xml
 %staging.liquibase.properties=models/myapp/database.properties
+%staging.liquibase.scanner=jar
 
 h4. Usage
 

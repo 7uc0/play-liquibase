@@ -18,7 +18,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.lockservice.LockService;
 import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.CompositeResourceAccessor;
+import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 
 import org.hibernate.JDBCException;
@@ -37,12 +37,22 @@ public class LiquibasePlugin extends PlayPlugin {
 		String autoupdate = Play.configuration.getProperty("liquibase.active","false");
 		String mainchangelogpath = Play.configuration.getProperty("liquibase.changelog", "mainchangelog.xml");
 		String propertiespath = Play.configuration.getProperty("liquibase.properties", "liquibase.properties");
+		String scanner = Play.configuration.getProperty("liquibase.scanner", "jar");
 		String contexts = Play.configuration.getProperty("liquibase.contexts",null);
 		contexts = (null != contexts && !contexts.trim().isEmpty()) ? contexts : null;
 		String actions = Play.configuration.getProperty("liquibase.actions");
 		
 		if (null == actions) {
 			throw new LiquibaseUpdateException("No valid action found for liquibase operation");
+		}
+		
+		ResourceAccessor accessor = null;
+		if ("jar".equals(scanner)) {
+			accessor = new ClassLoaderResourceAccessor(Play.classloader);
+		} else if ("src".equals(scanner)) {
+			accessor = 	new FileSystemResourceAccessor(Play.applicationPath.getAbsolutePath());
+		} else {
+			throw new LiquibaseUpdateException("No valid scanner found liquibase operation " + scanner);
 		}
 		
 		List<LiquibaseAction> acts = new ArrayList<LiquibaseAction>();
@@ -63,11 +73,10 @@ public class LiquibasePlugin extends PlayPlugin {
 			try {
 				
 				Connection cnx = DB.datasource.getConnection();
-				//ResourceAccessor composite = new CompositeResourceAccessor(new ClassLoaderResourceAccessor(Play.classloader), new FileSystemResourceAccessor(Play.applicationPath.getAbsolutePath()));
-				ResourceAccessor composite = new CompositeResourceAccessor(new ClassLoaderResourceAccessor(Play.classloader));
+
 				Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(cnx));
 				
-				final Liquibase liquibase = new Liquibase(mainchangelogpath, composite, database);
+				final Liquibase liquibase = new Liquibase(mainchangelogpath, accessor, database);
 				pstream = Play.classloader.getResourceAsStream(propertiespath);
 				clstream = Play.classloader.getResourceAsStream(mainchangelogpath);
 
