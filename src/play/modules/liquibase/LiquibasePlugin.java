@@ -1,6 +1,7 @@
 package play.modules.liquibase;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,8 +78,11 @@ public class LiquibasePlugin extends PlayPlugin {
 				Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(cnx));
 				
 				final Liquibase liquibase = new Liquibase(mainchangelogpath, accessor, database);
-				pstream = Play.classloader.getResourceAsStream(propertiespath);
-				clstream = Play.classloader.getResourceAsStream(mainchangelogpath);
+				if ("jar".equals(scanner))  {
+					pstream = Play.classloader.getResourceAsStream(propertiespath);
+				} else {
+					pstream =  new FileInputStream(Play.getFile(propertiespath));
+				}
 
 				if (null != pstream) {
 					Properties props = new Properties();

@@ -1,2 +1,0 @@
-require:
-    - org.liquibase -> liquibase-core 2.0.3
