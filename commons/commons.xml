@@ -91,8 +91,6 @@
 		<path id="maven-ant-tasks.classpath" path="${maven}/maven-ant-tasks.jar" />
 		<typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant" classpathref="maven-ant-tasks.classpath" />
 		<artifact:pom id="maven.project" file="${maven}/pom.xml" />
-		<artifact:remoteRepository id="leyio.releases.repo" url="http://nexus.leyio.com/nexus/content/groups/leyio.release.repo" />
-		<artifact:remoteRepository id="leyio.snapshots.repo" url="http://nexus.leyio.com/nexus/content/groups/leyio.snapshots.repo">
 			<snapshots updatePolicy="always" />
 		</artifact:remoteRepository>
 		<artifact:localRepository id="local.repository" path="${user.home}/.hudson/m2/repository" />
@@ -106,8 +104,6 @@
 			
 		<artifact:dependencies filesetId="compile.fileset" useScope="compile" settingsFile="${maven}/settings.xml" versionsId="compile.versions">
 			<pom refid="maven.project" />
-			<remoteRepository refid="leyio.releases.repo" />
-			<remoteRepository refid="leyio.snapshots.repo" />
 			<localRepository refid="local.repository" />
 		</artifact:dependencies>
 		<copy todir="lib/compile">
@@ -117,8 +113,6 @@
 
 		<artifact:dependencies filesetId="test.fileset" useScope="test" settingsFile="${maven}/settings.xml" versionsId="test.versions">
 			<pom refid="maven.project" />
-			<remoteRepository refid="leyio.releases.repo" />
-			<remoteRepository refid="leyio.snapshots.repo" />
 			<localRepository refid="local.repository" />
 		</artifact:dependencies>
 		<copy todir="lib/test" overwrite="true">

@@ -78,6 +78,7 @@ public class LiquibasePlugin extends PlayPlugin {
 				Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(cnx));
 				
 				final Liquibase liquibase = new Liquibase(mainchangelogpath, accessor, database);
+				
 				if ("jar".equals(scanner))  {
 					pstream = Play.classloader.getResourceAsStream(propertiespath);
 				} else {
