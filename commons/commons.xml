@@ -91,8 +91,6 @@
 		<path id="maven-ant-tasks.classpath" path="${maven}/maven-ant-tasks.jar" />
 		<typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant" classpathref="maven-ant-tasks.classpath" />
 		<artifact:pom id="maven.project" file="${maven}/pom.xml" />
-			<snapshots updatePolicy="always" />
-		</artifact:remoteRepository>
 		<artifact:localRepository id="local.repository" path="${user.home}/.hudson/m2/repository" />
 	</target>
 

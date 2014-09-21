@@ -74,7 +74,7 @@ public class LiquibasePlugin extends PlayPlugin {
 			try {
 				
 				Connection cnx = DB.datasource.getConnection();
-
+				cnx.setAutoCommit(true);
 				Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(cnx));
 				
 				final Liquibase liquibase = new Liquibase(mainchangelogpath, accessor, database);
