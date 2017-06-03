@@ -50,7 +50,7 @@
 
 	<target name="compile" depends="thirdparty">
 		<mkdir dir="tmp/classes" />
-		<javac destdir="tmp/classes" target="1.6" debug="true" includeantruntime="false">
+		<javac destdir="tmp/classes" target="1.7" debug="true" source="1.7" includeantruntime="false">
 			<src path="src"/>
 			<classpath refid="project.classpath" />
 		</javac>

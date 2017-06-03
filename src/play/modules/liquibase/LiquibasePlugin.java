@@ -71,13 +71,15 @@ public class LiquibasePlugin extends PlayPlugin {
 			InputStream pstream = null;
 			InputStream clstream = null;
 			
+			Liquibase liquibase = null;
+			Connection cnx = null;
 			try {
 				
-				Connection cnx = DB.datasource.getConnection();
-				cnx.setAutoCommit(true);
+				cnx = DB.getConnection();
+				cnx.setAutoCommit(false);
 				Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(cnx));
 				
-				final Liquibase liquibase = new Liquibase(mainchangelogpath, accessor, database);
+				liquibase = new Liquibase(mainchangelogpath, accessor, database);
 				
 				if ("jar".equals(scanner))  {
 					pstream = Play.classloader.getResourceAsStream(propertiespath);
@@ -99,6 +101,7 @@ public class LiquibasePlugin extends PlayPlugin {
 				}
 				
 				db = liquibase.getDatabase();
+				
 				for (LiquibaseAction op: acts) {
 					Logger.info("Dealing with op [%s]", op);
 					
@@ -133,21 +136,28 @@ public class LiquibasePlugin extends PlayPlugin {
 							break;
 					}
 					Logger.info("op [%s] performed",op);
-				}
-			} catch (SQLException sqe) { 
-				throw new LiquibaseUpdateException(sqe.getMessage());				
+				}			
+			} catch (SQLException sql) {
+				throw new LiquibaseUpdateException(sql.getMessage());
 			} catch (LiquibaseException e) { 
 				throw new LiquibaseUpdateException(e.getMessage());
 			} catch (IOException ioe) {
 				throw new LiquibaseUpdateException(ioe.getMessage());				
 			} finally {
 				if (null != db) {
-					try {						
+					try {	
 						db.close();
 					} catch (DatabaseException e) {
 						Logger.warn(e,"problem closing connection");
 					} catch (JDBCException jdbce) {
 						Logger.warn(jdbce,"problem closing connection");
+					}
+				}
+				if (null != cnx) {
+					try {
+						DB.getConnection().close();
+					} catch (Throwable t) {
+						Logger.warn("DB connection close error [%s]", t.getMessage());
 					}
 				}
 				if (null != pstream) {
