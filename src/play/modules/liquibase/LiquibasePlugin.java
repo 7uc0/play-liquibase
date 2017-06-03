@@ -107,10 +107,10 @@ public class LiquibasePlugin extends PlayPlugin {
 					
 					switch (op) {
 						case LISTLOCKS:
-							liquibase.reportLocks(System.out);
+							//liquibase.reportLocks(System.out);
 							break;
 						case RELEASELOCKS :
-							LockService.getInstance(db).forceReleaseLock();
+							//liquibase. getInstance(db).forceReleaseLock();
 							break;
 						case SYNC :
 							liquibase.changeLogSync(contexts);					
